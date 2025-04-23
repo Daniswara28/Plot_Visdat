@@ -1,0 +1,172 @@
+/* Spotify Themed CSS */
+
+/* Warna utama */
+:root {
+    --spotify-green: #1DB954;
+    --spotify-black: #191414;
+    --spotify-white: #FFFFFF;
+    --spotify-grey: #B3B3B3;
+    --spotify-light-black: #282828;
+}
+
+/* Judul utama */
+.main-title {
+    color: var(--spotify-green);
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.sub-title {
+    color: var(--spotify-white);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* Card dengan tema Spotify */
+.css-1r6slb0 {  /* Streamlit card class */
+    background-color: var(--spotify-light-black);
+    border: 1px solid var(--spotify-grey);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Button styling */
+div.stButton > button:first-child {
+    background-color: var(--spotify-green);
+    color: var(--spotify-white);
+    border: none;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+}
+
+div.stButton > button:hover {
+    background-color: #1ed760;  /* Lighter green on hover */
+    color: var(--spotify-white);
+}
+
+/* Sidebar styling */
+.css-1d391kg {  /* Sidebar class */
+    background-color: var(--spotify-black);
+}
+
+.sidebar .sidebar-content {
+    background-color: var(--spotify-black);
+}
+
+/* Custom sidebar selectors */
+.custom-sidebar-option {
+    background-color: var(--spotify-light-black);
+    color: var(--spotify-white);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.custom-sidebar-option:hover {
+    background-color: var(--spotify-green);
+}
+
+.custom-sidebar-option.active {
+    background-color: var(--spotify-green);
+    font-weight: bold;
+}
+
+/* Custom metric containers */
+.metric-container {
+    background-color: var(--spotify-light-black);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--spotify-green);
+}
+
+.metric-label {
+    font-size: 1rem;
+    color: var(--spotify-grey);
+    margin-top: 0.5rem;
+}
+
+/* Chart container */
+.chart-container {
+    background-color: var(--spotify-light-black);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 2rem 0;
+    color: var(--spotify-grey);
+    font-size: 0.8rem;
+}
+
+/* Custom decorations */
+.spotify-icon {
+    color: var(--spotify-green);
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+/* Custom tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: var(--spotify-black);
+    color: var(--spotify-white);
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Dark mode optimizations */
+.dark {
+    background-color: var(--spotify-black);
+    color: var(--spotify-white);
+}
+
+/* Visualisasi custom styling */
+.st-emotion-cache-13ln4jw {
+    background-color: var(--spotify-light-black);
+}
+
+/* Customized plotly chart background */
+.js-plotly-plot {
+    background-color: var(--spotify-light-black) !important;
+}
+
+/* Customizing select boxes */
+.stSelectbox > div > div {
+    background-color: var(--spotify-light-black);
+    color: var(--spotify-white);
+} 

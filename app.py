@@ -6,164 +6,194 @@ import numpy as np
 import plotly.express as px
 from streamlit_lottie import st_lottie
 import requests
+from helpers.utils import (load_lottieurl, display_spotify_title, spotify_card, 
+                           display_footer, load_and_prepare_data, display_metric)
 
-# HARUS PALING ATAS
-st.set_page_config(layout="wide")
+# Konfigurasi halaman
+st.set_page_config(
+    page_title="Spotify Data Visualizer",
+    page_icon="🎵",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Animasi Lottie
-def load_lottieurl(url):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+# Menerapkan custom CSS
+with open("style/main.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+# Lottie animation
 lottie_music = load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_w51pcehl.json")
-st_lottie(lottie_music, height=300, key="music")
 
-# Load dataset
-df = pd.read_csv("spotify_songs.csv")
-df['track_album_release_date'] = pd.to_datetime(df['track_album_release_date'], errors='coerce')
-df['year'] = df['track_album_release_date'].dt.year
+# Load dan persiapkan data
+df = load_and_prepare_data()
 
-st.title("🎵 Visualisasi Data Spotify")
+# Sidebar navigation
+st.sidebar.markdown("<div style='text-align: center; margin-bottom: 20px;'><h2 style='color: #1DB954;'>🎵 Spotify Insights</h2></div>", unsafe_allow_html=True)
 
-# Sidebar 
-option = st.sidebar.selectbox("Pilih Visualisasi", (
-    "1. Genre Musik Favorit Tahun 2020",
-    "2. Tren Genre Berdasarkan Tahun",
-    "3. Top 10 Artis Populer",
-    "4. Danceability vs Popularity",
-    "5. Rata-rata Danceability per Genre",
-    "6. Distribusi Tempo Lagu",
-    "7. Mood Musik per Genre (Barplot)",
-    "8. Mood Musik per Genre (Radar Chart)"
-))
+pages = {
+    "🏠 Beranda": "home",
+    "📊 Genre Analysis": "genre",
+    "👨‍🎤 Artist Insights": "artist",
+    "💃 Dance & Mood": "mood",
+    "🎵 Audio Features": "audio",
+    "📈 Playlist Analysis": "playlist"
+}
 
-# 1. Genre Favorit 2020
-if option == "1. Genre Musik Favorit Tahun 2020":
-    st.header("🎧 Genre Musik Favorit Tahun 2020")
-    df_2020 = df[df['year'] == 2020]
-    genre_popularity = df_2020.groupby('playlist_genre')['track_popularity'].mean().sort_values(ascending=False)
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(x=genre_popularity.values, y=genre_popularity.index, palette='crest', ax=ax)
-    ax.set_title("Popularitas Genre Musik Tahun 2020")
-    st.pyplot(fig)
+# Sidebar navigation
+selection = st.sidebar.radio("Navigasi", list(pages.keys()))
 
-# 2. Tren Genre Berdasarkan Tahun
-elif option == "2. Tren Genre Berdasarkan Tahun":
-    st.header("📈 Tren Genre Musik dari Tahun ke Tahun")
-    trend = df[df['year'] >= 2010].groupby(['year', 'playlist_genre'])['track_popularity'].mean().reset_index()
-    fig, ax = plt.subplots(figsize=(12, 7))
-    sns.lineplot(data=trend, x='year', y='track_popularity', hue='playlist_genre', marker='o', ax=ax)
-    ax.set_title("Perubahan Popularitas Genre Musik")
-    st.pyplot(fig)
+st.sidebar.markdown("---")
+st.sidebar.info("""
+**About This App**  
+Aplikasi ini menyajikan visualisasi data dari dataset Spotify untuk memahami tren musik, preferensi pendengar, dan karakteristik audio.
+""")
 
-# 3. Top 10 Artis Populer
-elif option == "3. Top 10 Artis Populer":
-    st.header("🏆 Top 10 Artis Berdasarkan Popularitas Lagu")
-    top_artist = df.groupby('track_artist')['track_popularity'].mean().sort_values(ascending=False).head(10)
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(x=top_artist.values, y=top_artist.index, palette='viridis', ax=ax)
-    ax.set_title("Top 10 Artis Populer")
-    st.pyplot(fig)
-
-# --- 4. Danceability vs Popularity per Genre ---
-elif option == "4. Danceability vs Popularity":
-    st.subheader("🎚️ Danceability vs Popularity per Genre")
-
-    # Buat mapping warna tetap per genre
-    unique_genres = sorted(df['playlist_genre'].dropna().unique())
-    palette = sns.color_palette("tab10", len(unique_genres))
-    genre_colors = dict(zip(unique_genres, palette))
-
-    # Opsi dropdown
-    genre_options = ["Semua Genre"] + unique_genres
-    selected_genre = st.selectbox("Pilih Genre", genre_options)
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    if selected_genre == "Semua Genre":
-        sns.scatterplot(
-            data=df,
-            x="danceability",
-            y="track_popularity",
-            hue="playlist_genre",
-            palette=genre_colors,
-            alpha=0.6,
-            ax=ax
+# Halaman Beranda
+if selection == "🏠 Beranda":
+    # Header section dengan animasi Lottie
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st_lottie(lottie_music, height=300, key="music_home")
+    with col2:
+        st.markdown("""
+        <h1 style='color: #1DB954; font-size: 3rem;'>Spotify Data Visualization</h1>
+        <p style='font-size: 1.2rem; color: #B3B3B3;'>Explore music trends, genre popularities, and audio characteristics using Spotify data.</p>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Highlights dan Metrik-metrik Penting
+    st.header("📊 Dataset Highlights")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        total_songs = len(df)
+        display_metric("Total Lagu", f"{total_songs:,}", icon="🎵")
+    
+    with col2:
+        total_artists = df['track_artist'].nunique()
+        display_metric("Jumlah Artis", f"{total_artists:,}", icon="👨‍🎤")
+    
+    with col3:
+        avg_popularity = round(df['track_popularity'].mean(), 1)
+        display_metric("Rata-rata Popularitas", avg_popularity, icon="⭐")
+    
+    with col4:
+        genres = df['playlist_genre'].nunique()
+        display_metric("Jumlah Genre", genres, icon="🎸")
+    
+    st.markdown("---")
+    
+    # Penjelasan tentang dataset
+    st.header("🔍 Tentang Dataset")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown("""
+        Dataset ini berisi lagu-lagu dari berbagai playlist Spotify, dengan fitur-fitur seperti:
+        
+        - **Track metadata**: Nama lagu, artis, album, tanggal rilis
+        - **Audio features**: Danceability, energy, valence, acousticness, dll
+        - **Playlist info**: Genre, subgenre
+        - **Popularity**: Popularitas lagu (0-100)
+        
+        Data ini sangat berguna untuk memahami karakteristik musik dan tren di berbagai genre.
+        """)
+    
+    with col2:
+        st.image("https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png", width=250)
+    
+    st.markdown("---")
+    
+    # Highlight Cards - Temuan Menarik
+    st.header("🔎 Highlights & Insights")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        spotify_card(
+            "Genre Terpopuler",
+            "Pop adalah genre dengan tingkat popularitas tertinggi, diikuti oleh Rap dan R&B.",
+            "🏆"
         )
-        ax.set_title("Danceability vs Popularity (Semua Genre)")
-        ax.legend(title="Genre", bbox_to_anchor=(1.05, 1), loc="upper left")
-    else:
-        genre_data = df[df['playlist_genre'] == selected_genre]
-        sns.scatterplot(
-            data=genre_data,
-            x="danceability",
-            y="track_popularity",
-            color=genre_colors[selected_genre],  # Gunakan warna tetap
-            alpha=0.6,
-            ax=ax
+        
+        spotify_card(
+            "Tren Danceability",
+            "Lagu-lagu EDM dan Pop memiliki danceability tertinggi, menunjukkan preferensi pendengar untuk musik yang bisa digunakan untuk menari.",
+            "💃"
         )
-        ax.set_title(f"Danceability vs Popularity ({selected_genre})")
-        if ax.legend_:
-            ax.legend_.remove()
+    
+    with col2:
+        spotify_card(
+            "Karakteristik Audio",
+            "Lagu-lagu dengan energy dan loudness yang tinggi cenderung lebih populer di platform Spotify.",
+            "🔊"
+        )
+        
+        spotify_card(
+            "Artis Teratas",
+            "Artis dengan rata-rata popularitas tertinggi menunjukkan konsistensi dalam menghasilkan hit songs.",
+            "🌟"
+        )
+    
+    st.markdown("---")
+    
+    # Teaser visualisasi
+    st.header("📈 Eksplorasi Data")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Scatter plot sederhana untuk danceability vs energy
+        fig = px.scatter(
+            df.sample(1000), 
+            x="danceability", 
+            y="energy",
+            color="playlist_genre",
+            size="track_popularity",
+            hover_name="track_name",
+            title="Danceability vs Energy by Genre",
+            labels={"danceability": "Danceability", "energy": "Energy", "playlist_genre": "Genre"},
+            opacity=0.7
+        )
+        
+        fig.update_layout(
+            plot_bgcolor='rgba(40,40,40,0.8)',
+            paper_bgcolor='rgba(40,40,40,0.8)',
+            font_color='white'
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Bar chart untuk rata-rata popularitas per genre
+        genre_pop = df.groupby('playlist_genre')['track_popularity'].mean().sort_values(ascending=False)
+        
+        fig = px.bar(
+            x=genre_pop.index, 
+            y=genre_pop.values,
+            color=genre_pop.values,
+            color_continuous_scale='Viridis',
+            title="Rata-rata Popularitas per Genre",
+            labels={"x": "Genre", "y": "Popularitas", "color": "Popularitas"}
+        )
+        
+        fig.update_layout(
+            plot_bgcolor='rgba(40,40,40,0.8)',
+            paper_bgcolor='rgba(40,40,40,0.8)',
+            font_color='white'
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Call to action
+    st.markdown("""
+    <div style='background-color: #1DB954; padding: 1.5rem; border-radius: 10px; text-align: center; margin-top: 2rem;'>
+        <h2 style='color: white; margin-bottom: 0.5rem;'>Jelajahi Lebih Lanjut!</h2>
+        <p style='color: white;'>Gunakan menu navigasi di sidebar untuk menjelajahi analisis data yang lebih mendalam dan interaktif.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    ax.set_xlabel("Danceability")
-    ax.set_ylabel("Popularity")
-    st.pyplot(fig)
-
-
-
-# 5. Rata-rata Danceability per Genre
-elif option == "5. Rata-rata Danceability per Genre":
-    st.header("🎼 Rata-rata Danceability per Genre")
-    dance_avg = df.groupby('playlist_genre')['danceability'].mean().sort_values()
-    fig, ax = plt.subplots()
-    dance_avg.plot(kind='barh', color='mediumseagreen', ax=ax)
-    ax.set_xlabel("Danceability")
-    ax.set_title("Rata-rata Danceability per Genre")
-    st.pyplot(fig)
-
-# 6. Distribusi Tempo Lagu
-elif option == "6. Distribusi Tempo Lagu":
-    st.header("🎵 Distribusi Tempo Lagu")
-    fig, ax = plt.subplots()
-    sns.histplot(df["tempo"], kde=True, color="skyblue", bins=30, ax=ax)
-    ax.set_title("Distribusi Tempo")
-    st.pyplot(fig)
-
-# 7. Mood Musik per Genre (Barplot)
-elif option == "7. Mood Musik per Genre (Barplot)":
-    st.header("🎶 Mood Musik per Genre (Valence, Energy, dll)")
-    mood_cols = ["valence", "energy", "acousticness", "danceability", "instrumentalness"]
-    mood_avg = df.groupby("playlist_genre")[mood_cols].mean()
-    fig, ax = plt.subplots(figsize=(10, 6))
-    mood_avg.plot(kind="bar", ax=ax)
-    ax.set_title("Mood Musik per Genre Playlist")
-    st.pyplot(fig)
-
-# 8. Mood Musik Radar Chart
-elif option == "8. Mood Musik per Genre (Radar Chart)":
-    import plotly.graph_objects as go
-
-    st.header("📊 Mood Musik per Genre (Radar Chart)")
-    mood_cols = ["valence", "energy", "acousticness", "danceability", "instrumentalness"]
-    genres = df["playlist_genre"].unique()
-
-    genre_choice = st.selectbox("Pilih Genre", genres)
-
-    mood_vals = df[df["playlist_genre"] == genre_choice][mood_cols].mean()
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(
-        r=mood_vals.values,
-        theta=mood_cols,
-        fill='toself',
-        name=genre_choice
-    ))
-    fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True)),
-        showlegend=False,
-        title=f"Radar Chart Mood Musik: {genre_choice}"
-    )
-    st.plotly_chart(fig)
+# Footer
+display_footer()
