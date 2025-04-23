@@ -186,7 +186,7 @@ with tab2:
     with col1:
         start_year = st.selectbox("Tahun Awal", sorted(df['year'].dropna().unique()), index=5)
     with col2:
-        end_year = st.selectbox("Tahun Akhir", sorted(df['year'].dropna().unique()), index=-1)
+        end_year = st.selectbox("Tahun Akhir", sorted(df['year'].dropna().unique()), index=len(sorted(df['year'].dropna().unique())) - 1)
     
     # Hitung peringkat untuk kedua tahun
     start_rank = df[df['year'] == start_year].groupby('playlist_genre')['track_popularity'].mean().sort_values(ascending=False)
