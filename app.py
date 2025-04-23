@@ -68,29 +68,50 @@ elif option == "3. Top 10 Artis Populer":
     st.pyplot(fig)
 
 # --- 4. Danceability vs Popularity per Genre ---
-elif option == "Danceability vs Popularity":
-    st.subheader("Danceability vs Popularity")
+elif option == "4. Danceability vs Popularity":
+    st.subheader("🎚️ Danceability vs Popularity per Genre")
 
-    # Dropdown genre
-    selected_genre = st.selectbox("Pilih Genre", df['playlist_genre'].unique())
+    # Buat mapping warna tetap per genre
+    unique_genres = sorted(df['playlist_genre'].dropna().unique())
+    palette = sns.color_palette("tab10", len(unique_genres))
+    genre_colors = dict(zip(unique_genres, palette))
 
-    # Filter data
-    genre_data = df[df['playlist_genre'] == selected_genre]
+    # Opsi dropdown
+    genre_options = ["Semua Genre"] + unique_genres
+    selected_genre = st.selectbox("Pilih Genre", genre_options)
 
-    # Plot scatter
-    fig, ax = plt.subplots()
-    sns.scatterplot(
-        x='danceability',
-        y='track_popularity',
-        data=genre_data,
-        alpha=0.6,
-        color='teal',
-        ax=ax
-    )
-    ax.set_title(f'Danceability vs Popularity ({selected_genre})')
-    ax.set_xlabel('Danceability')
-    ax.set_ylabel('Popularity')
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    if selected_genre == "Semua Genre":
+        sns.scatterplot(
+            data=df,
+            x="danceability",
+            y="track_popularity",
+            hue="playlist_genre",
+            palette=genre_colors,
+            alpha=0.6,
+            ax=ax
+        )
+        ax.set_title("Danceability vs Popularity (Semua Genre)")
+        ax.legend(title="Genre", bbox_to_anchor=(1.05, 1), loc="upper left")
+    else:
+        genre_data = df[df['playlist_genre'] == selected_genre]
+        sns.scatterplot(
+            data=genre_data,
+            x="danceability",
+            y="track_popularity",
+            color=genre_colors[selected_genre],  # Gunakan warna tetap
+            alpha=0.6,
+            ax=ax
+        )
+        ax.set_title(f"Danceability vs Popularity ({selected_genre})")
+        if ax.legend_:
+            ax.legend_.remove()
+
+    ax.set_xlabel("Danceability")
+    ax.set_ylabel("Popularity")
     st.pyplot(fig)
+
 
 
 # 5. Rata-rata Danceability per Genre
